@@ -13,7 +13,7 @@ curl -s -X POST "http://192.168.1.1:52869/upnp/control/WANIPConn1" \
       <NewInternalPort>${server_port}</NewInternalPort>
       <NewInternalClient>${private_ip}</NewInternalClient>
       <NewEnabled>1</NewEnabled>
-      <NewPortMappingDescription>Manual-UPnP</NewPortMappingDescription>
+      <NewPortMappingDescription>Natter-UPnP</NewPortMappingDescription>
       <NewLeaseDuration>0</NewLeaseDuration>
     </u:AddPortMapping>
   </s:Body>
