@@ -23,6 +23,3 @@ curl -s -X POST "http://192.168.1.1:52869/upnp/control/WANIPConn1" \
     </u:AddPortMapping>
   </s:Body>
 </s:Envelope>"
-log_file="/tmp/${server_port}.log"
-echo "${public_ip}:${public_port}" > "$log_file"
-echo "${public_ip}:${public_port}"
