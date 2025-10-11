@@ -1,0 +1,28 @@
+#!/bin/sh
+server_port="${0##*/}"
+protocol="$1"
+private_ip="$2"
+private_port="$3"
+public_ip="$4"
+public_port="$5"
+curl -s -X POST "http://192.168.1.1:52869/upnp/control/WANIPConn1" \
+     -H "Content-Type: text/xml; charset=utf-8" \
+     -H "SOAPAction: \"urn:schemas-upnp-org:service:WANIPConnection:1#AddPortMapping\"" \
+     -d "<?xml version=\"1.0\"?>
+<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">
+  <s:Body>
+    <u:AddPortMapping xmlns:u=\"urn:schemas-upnp-org:service:WANIPConnection:1\">
+      <NewRemoteHost></NewRemoteHost>
+      <NewExternalPort>${private_port}</NewExternalPort>
+      <NewProtocol>$(echo "$protocol" | tr 'a-z' 'A-Z')</NewProtocol>
+      <NewInternalPort>${server_port}</NewInternalPort>
+      <NewInternalClient>${private_ip}</NewInternalClient>
+      <NewEnabled>1</NewEnabled>
+      <NewPortMappingDescription>Manual-UPnP</NewPortMappingDescription>
+      <NewLeaseDuration>0</NewLeaseDuration>
+    </u:AddPortMapping>
+  </s:Body>
+</s:Envelope>"
+log_file="/tmp/${server_port}.log"
+echo "${public_ip}:${public_port}" > "$log_file"
+echo "${public_ip}:${public_port}"
