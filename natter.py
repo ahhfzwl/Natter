@@ -1689,7 +1689,6 @@ def natter_main(show_title = True):
 
     if not stun_list:
         stun_list = [
-            "fwa.lifesizecloud.com",
             "global.turn.twilio.com",
             "turn.cloudflare.com",
             "stun.nextcloud.com",
