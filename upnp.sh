@@ -10,8 +10,8 @@ curl -s -X POST "http://192.168.1.1:52869/upnp/control/WANIPConn1" \
       <NewRemoteHost></NewRemoteHost>
       <NewProtocol>$(echo "$protocol" | tr 'a-z' 'A-Z')</NewProtocol>
       <NewInternalClient>${private_ip}</NewInternalClient>
-      <NewExternalPort>${private_port}</NewExternalPort>
-      <NewInternalPort>${b}</NewInternalPort>
+      <NewInternalPort>${private_port}</NewInternalPort>
+      <NewExternalPort>${b}</NewExternalPort>
       <NewEnabled>1</NewEnabled>
       <NewPortMappingDescription>Natter-UPnP</NewPortMappingDescription>
       <NewLeaseDuration>0</NewLeaseDuration>
