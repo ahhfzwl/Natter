@@ -1,5 +1,5 @@
 #!/bin/sh
-server_port="${0##*/}"; protocol="$1"; private_ip="$2"; private_port="$3"; public_ip="$4"; public_port="$5"
+protocol="$1"; private_ip="$2"; private_port="$3"; b="$6"
 curl -s -X POST "http://192.168.1.1:52869/upnp/control/WANIPConn1" \
      -H "Content-Type: text/xml; charset=utf-8" \
      -H "SOAPAction: \"urn:schemas-upnp-org:service:WANIPConnection:1#AddPortMapping\"" \
@@ -8,10 +8,10 @@ curl -s -X POST "http://192.168.1.1:52869/upnp/control/WANIPConn1" \
   <s:Body>
     <u:AddPortMapping xmlns:u=\"urn:schemas-upnp-org:service:WANIPConnection:1\">
       <NewRemoteHost></NewRemoteHost>
-      <NewExternalPort>${private_port}</NewExternalPort>
       <NewProtocol>$(echo "$protocol" | tr 'a-z' 'A-Z')</NewProtocol>
-      <NewInternalPort>${server_port}</NewInternalPort>
       <NewInternalClient>${private_ip}</NewInternalClient>
+      <NewExternalPort>${private_port}</NewExternalPort>
+      <NewInternalPort>${b}</NewInternalPort>
       <NewEnabled>1</NewEnabled>
       <NewPortMappingDescription>Natter-UPnP</NewPortMappingDescription>
       <NewLeaseDuration>0</NewLeaseDuration>
