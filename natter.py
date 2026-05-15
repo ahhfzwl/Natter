@@ -34,7 +34,7 @@ import argparse
 import threading
 import subprocess
 
-__version__ = "2.2.0"
+__version__ = "2.2.1"
 
 
 class Logger(object):
@@ -235,6 +235,8 @@ class StunClient(object):
     def get_mapping(self):
         first = self.stun_server_list[0]
         while True:
+            if self.source_port:
+                set_reuse_port(self.source_port)
             try:
                 return self._get_mapping()
             except StunClient.ServerUnavailable as ex:
@@ -686,25 +688,29 @@ class ForwardNftables(object):
             return
         except subprocess.CalledProcessError:
             pass
+
+        # Priority values:
+        #   dstnat (-100) - 5: -105
+        #   srcnat ( 100) - 5:   95
         initial_rules = (
             '''
             table ip natter {
                 chain natter_dnat { }
                 chain natter_snat { }
                 chain prerouting {
-                    type nat hook prerouting priority dstnat-5; policy accept;
+                    type nat hook prerouting priority -105; policy accept;
                     jump natter_dnat;
                 }
                 chain output {
-                    type nat hook output priority dstnat-5; policy accept;
+                    type nat hook output priority -105; policy accept;
                     jump natter_dnat;
                 }
                 chain postrouting {
-                    type nat hook postrouting priority srcnat-5; policy accept;
+                    type nat hook postrouting priority 95; policy accept;
                     jump natter_snat;
                 }
                 chain input {
-                    type nat hook input priority srcnat-5; policy accept;
+                    type nat hook input priority 95; policy accept;
                     jump natter_snat;
                 }
             }
@@ -1433,6 +1439,18 @@ def fix_codecs(codec_list = ["utf-8", "idna"]):
         codecs.register(search_codec)
 
 
+def run_natter_check():
+    try:
+        modcheck = __import__('natter-check', None, None, ['natter-check'])
+    except ImportError:
+        raise RuntimeError("natter-check.py is missing") from None
+
+    if hasattr(modcheck, 'natter-check'):
+        modcheck = modcheck.__dict__['natter-check']
+
+    modcheck.main()
+
+
 def check_docker_network():
     if not sys.platform.startswith("linux"):
         return
@@ -1541,6 +1559,19 @@ def ip_normalize(ipaddr):
     return socket.inet_ntoa(socket.inet_aton(ipaddr))
 
 
+def set_reuse_port(port):
+    try:
+        from natterutils import reuse_port
+    except ImportError:
+        Logger.debug("reuse-port: Not implemented on this platform. Ignored.")
+        return
+    try:
+        reuse_port(port)
+    except OSError:
+        Logger.debug("reuse-port: Failed to reuse port. Ignored.")
+        return
+
+
 def natter_main(show_title = True):
     argp = argparse.ArgumentParser(
         description="Expose your port behind full-cone NAT to the Internet.", add_help=False
@@ -1552,6 +1583,9 @@ def natter_main(show_title = True):
     )
     group.add_argument(
         "--help", action="help", help="show this help message and exit"
+    )
+    group.add_argument(
+        "--check", action="store_true", help="run natter-check and exit"
     )
     group.add_argument(
         "-v", action="store_true", help="verbose mode, printing debug messages"
@@ -1629,6 +1663,10 @@ def natter_main(show_title = True):
         Logger.set_level(Logger.DEBUG)
     else:
         sys.tracebacklimit = 0
+
+    if args.check:
+        run_natter_check()
+        sys.exit(0)
 
     validate_positive(interval)
     if stun_list:
