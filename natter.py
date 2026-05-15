@@ -1857,9 +1857,16 @@ def natter_main(show_title = True):
         protocol = "udp" if udp_mode else "tcp"
         inner_ip, inner_port = to_addr if method else natter_addr
         outer_ip, outer_port = outer_addr
+        bind_port = args.b
         Logger.info("Calling script: %s" % notify_sh)
         subprocess.call([
-            os.path.abspath(notify_sh), protocol, str(inner_ip), str(inner_port), str(outer_ip), str(outer_port)
+            os.path.abspath(notify_sh), 
+            protocol, 
+            str(inner_ip), 
+            str(inner_port), 
+            str(outer_ip), 
+            str(outer_port),
+            str(bind_port)
         ], shell=False)
 
     # Display check results, TCP only
